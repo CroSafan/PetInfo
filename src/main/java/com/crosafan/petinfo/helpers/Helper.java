@@ -5,6 +5,7 @@ import java.util.Arrays;
 import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.util.StringUtils;
 
 public class Helper {
 
@@ -21,19 +22,6 @@ public class Helper {
 		return false;
 	}
 
-	public static boolean isPlayerInSkyblock() {
-		boolean isInSkyblock = false;
-		if (Minecraft.getMinecraft().theWorld.getScoreboard().getObjectiveInDisplaySlot(1) != null) {
-			String gameModeName = Minecraft.getMinecraft().theWorld.getScoreboard().getObjectiveInDisplaySlot(1).getDisplayName();
-			if (gameModeName.toLowerCase().contains("SkyBlock".toLowerCase())) {
-				isInSkyblock = true;
-			}
-
-		}
-
-		return isInSkyblock;
-	}
-
 	public static boolean ignoreTooltip(String tooltip) {
 		if (tooltip.isEmpty()) {
 			return true;
@@ -41,6 +29,16 @@ public class Helper {
 
 		// if it matches it shouldnt be displayed
 		return Arrays.stream(ignoreTooltips).anyMatch(tooltip::equals);
+	}
+
+	public static boolean isPlayerInSkyblock() {
+		boolean isInSkyblock = false;
+		if (Minecraft.getMinecraft().theWorld.getScoreboard().getObjectiveInDisplaySlot(1) != null) {
+			if ((StringUtils.stripControlCodes(Minecraft.getMinecraft().theWorld.getScoreboard().getObjectiveInDisplaySlot(1).getDisplayName()).contains("SKYBLOCK"))) {
+				isInSkyblock = true;
+			}
+		}
+		return isInSkyblock;
 	}
 
 }

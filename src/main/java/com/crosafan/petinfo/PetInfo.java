@@ -9,9 +9,11 @@ import java.io.OutputStream;
 import java.util.Properties;
 
 import com.crosafan.commands.PetInfoCommand;
+import com.crosafan.petinfo.helpers.Helper;
 import com.crosafan.petinfo.listeners.PlayerListener;
 import com.crosafan.petinfo.listeners.RenderListener;
 
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -32,8 +34,8 @@ public class PetInfo {
 
 	public static int[] guiLocation = new int[] { 5, 5 };
 	public static String currentPetDisplayText = "No pet selected!";
+	public static boolean isInSkyblock=false;
 
-	@Instance
 	public static PetInfo instance;
 
 	public PlayerListener playerListener;
@@ -111,5 +113,7 @@ public class PetInfo {
 			io.printStackTrace();
 		}
 	}
+
+	
 
 }

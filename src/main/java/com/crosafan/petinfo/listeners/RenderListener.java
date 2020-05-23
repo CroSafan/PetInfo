@@ -6,6 +6,7 @@ import com.crosafan.petinfo.helpers.Helper;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraftforge.client.GuiIngameForge;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -29,8 +30,11 @@ public class RenderListener {
 
 	@SubscribeEvent
 	public void renderGameOverlayEvent(RenderGameOverlayEvent.Post event) {
-		if (Helper.isPlayerInSkyblock() && (event.type == RenderGameOverlayEvent.ElementType.EXPERIENCE || event.type == RenderGameOverlayEvent.ElementType.JUMPBAR)) {
-			renderPet();
+
+		if ((event.type == RenderGameOverlayEvent.ElementType.EXPERIENCE || event.type == RenderGameOverlayEvent.ElementType.JUMPBAR)) {
+			if (petInfo.isInSkyblock) {
+				renderPet();
+			}
 		}
 	}
 
@@ -44,10 +48,8 @@ public class RenderListener {
 	}
 
 	public void renderPet() {
-		if (petInfo.currentPetDisplayText != null) {
-			
-			renderer.drawString(String.valueOf(petInfo.currentPetDisplayText), petInfo.guiLocation[0], petInfo.guiLocation[1], textColor, true);
-		} 
+
+		renderer.drawString(petInfo.currentPetDisplayText, petInfo.guiLocation[0], petInfo.guiLocation[1], textColor, false);
 
 	}
 
