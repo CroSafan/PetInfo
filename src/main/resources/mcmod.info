@@ -1,0 +1,16 @@
+[
+{
+  "modid": "petinfo",
+  "name": "Pet info",
+  "description": "Display current pet info in Hypixel Skyblock.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["CroSafan"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
