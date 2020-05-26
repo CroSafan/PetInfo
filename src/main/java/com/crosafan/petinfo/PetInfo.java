@@ -10,6 +10,7 @@ import java.util.Properties;
 
 import com.crosafan.commands.PetInfoCommand;
 import com.crosafan.petinfo.helpers.Helper;
+import com.crosafan.petinfo.helpers.Pet;
 import com.crosafan.petinfo.listeners.PlayerListener;
 import com.crosafan.petinfo.listeners.RenderListener;
 
@@ -33,8 +34,12 @@ public class PetInfo {
 	public static boolean openGui = false;
 
 	public static int[] guiLocation = new int[] { 5, 5 };
-	public static String currentPetDisplayText = "No pet selected!";
-	public static boolean isInSkyblock=false;
+	public static Pet currentPet = new Pet();
+	public static boolean isInSkyblock = false;
+	public static String currentSkill = "";
+	public static float currentXp = 0.0f;
+	public static float gainedXp = 0.0f;
+	public static int tamingLevel = 0;
 
 	public static PetInfo instance;
 
@@ -88,10 +93,17 @@ public class PetInfo {
 			prop.load(input);
 
 			// get the property value and print it out
-			currentPetDisplayText = prop.getProperty("petinfo.currentSelectedPet", "No pet selected!");
 			guiLocation[0] = Integer.valueOf(prop.getProperty("petinfo.guixpos", "5"));
 			guiLocation[1] = Integer.valueOf(prop.getProperty("petinfo.guiypos", "5"));
-
+			tamingLevel = Integer.valueOf(prop.getProperty("petinfo.taminglevel", "1"));
+			currentPet.setDisplayName(prop.getProperty("petinfo.currentSelectedPet", "No pet selected!"));
+			currentPet.setHeldItemType(prop.getProperty("petinfo.helditemtype", ""));
+			currentPet.setHeldItemPetXpBoost(Float.parseFloat(prop.getProperty("petinfo.helditempetxpboost", "0.0")));
+			currentPet.setPetType(prop.getProperty("petinfo.pettype", ""));
+			currentPet.setCurrentProgress(Float.parseFloat(prop.getProperty("petinfo.currentprogress", "0.0")));
+			currentPet.setCurrentXp(Float.parseFloat(prop.getProperty("petinfo.petcurrentxp", "0.0")));
+			currentPet.setPetLevel(Integer.parseInt(prop.getProperty("petinfo.petlevel", "1")));
+			currentPet.setXpNeededForNextLevel(Integer.parseInt(prop.getProperty("petinfo.xpNeededForNextLevel", "0")));
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
@@ -103,17 +115,22 @@ public class PetInfo {
 
 			Properties prop = new Properties();
 
-			prop.setProperty("petinfo.currentSelectedPet", currentPetDisplayText);
 			prop.setProperty("petinfo.guixpos", String.valueOf(guiLocation[0]));
 			prop.setProperty("petinfo.guiypos", String.valueOf(guiLocation[1]));
-
+			prop.setProperty("petinfo.taminglevel", String.valueOf(tamingLevel));
+			prop.setProperty("petinfo.currentSelectedPet", currentPet.getDisplayName());
+			prop.setProperty("petinfo.helditemtype", currentPet.getHeldItemType());
+			prop.setProperty("petinfo.helditempetxpboost", String.valueOf(currentPet.getHeldItemPetXpBoost()));
+			prop.setProperty("petinfo.pettype", currentPet.getPetType());
+			prop.setProperty("petinfo.currentprogress", String.valueOf(currentPet.getCurrentProgress()));
+			prop.setProperty("petinfo.petcurrentxp", String.valueOf(currentPet.getCurrentXp()));
+			prop.setProperty("petinfo.petlevel", String.valueOf(currentPet.getPetLevel()));
+			prop.setProperty("petinfo.xpNeededForNextLevel", String.valueOf(currentPet.getXpNeededForNextLevel()));
 			prop.store(output, null);
 
 		} catch (IOException io) {
 			io.printStackTrace();
 		}
 	}
-
-	
 
 }
