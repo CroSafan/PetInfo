@@ -4,6 +4,7 @@
   "name": "Pet info",
   "description": "Display current pet info in Hypixel Skyblock.",
   "version": "${version}",
+  "group":"com.crosafan.petinfo",
   "mcversion": "${mcversion}",
   "url": "",
   "updateUrl": "",

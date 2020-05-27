@@ -1,4 +1,4 @@
-package com.crosafan.commands;
+package com.crosafan.petinfo.commands;
 
 import com.crosafan.petinfo.PetInfo;
 

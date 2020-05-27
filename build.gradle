@@ -24,6 +24,12 @@ version = "1.0"
 group= "com.crosafan.petinfo" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "petinfo"
 
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 minecraft {
     version = "1.8.9-11.15.1.2318-1.8.9"
     runDir = "run"

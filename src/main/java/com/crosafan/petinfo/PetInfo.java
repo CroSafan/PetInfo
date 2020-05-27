@@ -7,8 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
+import org.apache.logging.log4j.Logger;
 
-import com.crosafan.commands.PetInfoCommand;
+import com.crosafan.petinfo.commands.PetInfoCommand;
 import com.crosafan.petinfo.helpers.Helper;
 import com.crosafan.petinfo.helpers.Pet;
 import com.crosafan.petinfo.listeners.PlayerListener;
@@ -47,10 +48,13 @@ public class PetInfo {
 	public RenderListener renderListener;
 
 	private static File configFile;
+	public static Logger logger;
 
 	@Mod.EventHandler
 
 	public static void PreInit(FMLPreInitializationEvent event) {
+		logger = event.getModLog();
+
 		loadConfig();
 	}
 
@@ -65,6 +69,8 @@ public class PetInfo {
 
 		MinecraftForge.EVENT_BUS.register(playerListener);
 		MinecraftForge.EVENT_BUS.register(renderListener);
+		
+		
 
 	}
 

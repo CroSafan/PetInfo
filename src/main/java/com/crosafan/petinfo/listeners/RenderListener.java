@@ -33,7 +33,9 @@ public class RenderListener {
 
 		if ((event.type == RenderGameOverlayEvent.ElementType.EXPERIENCE || event.type == RenderGameOverlayEvent.ElementType.JUMPBAR)) {
 			if (petInfo.isInSkyblock) {
-				renderPet();
+				if (petInfo.currentPet != null) {
+					renderPet();
+				}
 			}
 		}
 	}
@@ -48,7 +50,13 @@ public class RenderListener {
 	}
 
 	public void renderPet() {
-		renderer.drawString(petInfo.currentPet.getDisplayName() + " §f" + String.valueOf(petInfo.currentPet.getCurrentProgress()) + "%", petInfo.guiLocation[0], petInfo.guiLocation[1], textColor, false);
+			try {
+				renderer.drawString(petInfo.currentPet.getDisplayName() + " " + String.valueOf(petInfo.currentPet.getCurrentProgress()) + "%", petInfo.guiLocation[0], petInfo.guiLocation[1], textColor, false);
+			}catch(NullPointerException npe) {
+				petInfo.logger.error(npe.getLocalizedMessage());
+	
+			}
+		
 
 	}
 

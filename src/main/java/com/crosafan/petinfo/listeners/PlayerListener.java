@@ -23,8 +23,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 public class PlayerListener {
 
-	private static final Pattern XP_GAIN_AND_SKILL_PATTERN = Pattern.compile("§\\d\\+(\\d*\\.?\\d*) (Farming|Mining|Combat|Foraging|Fishing|Enchanting|Alchemy) (\\(([0-9.,]+)/([0-9.,]+)\\))");
-	private static final Pattern PET_NAME_PATTERN = Pattern.compile("§\\d\\[Lvl \\d+\\] §\\d.+");
+	private static final Pattern XP_GAIN_AND_SKILL_PATTERN = Pattern.compile("Â§\\d\\+(\\d*\\.?\\d*) (Farming|Mining|Combat|Foraging|Fishing|Enchanting|Alchemy) (\\(([0-9.,]+)/([0-9.,]+)\\))");
+	private static final Pattern PET_NAME_PATTERN = Pattern.compile("Â§\\d\\[Lvl \\d+\\] Â§\\d.+");
 	private PetInfo petInfo;
 
 	private Pet tempPet;
@@ -40,13 +40,14 @@ public class PlayerListener {
 		if (petInfo.isInSkyblock) {
 			if (Helper.isPetMenuOpen()) {
 				ItemStack hoveredItem = e.itemStack;
+				System.out.println(hoveredItem.getDisplayName());
 				Matcher matcher = PET_NAME_PATTERN.matcher(hoveredItem.getDisplayName());
 				if (matcher.matches()) {
-
+					System.out.println("Here ");
 					try {
 						tempPet = Helper.parseItemStackToPet(hoveredItem);
 					} catch (ParseException e1) {
-						e1.printStackTrace();
+						petInfo.logger.info(e1.getMessage());
 					}
 				}
 			}
@@ -59,7 +60,9 @@ public class PlayerListener {
 
 		String message = e.message.getUnformattedText();
 		if (message.contains("You summoned your")) {
-			petInfo.currentPet = tempPet;
+			if (tempPet != null) {
+				petInfo.currentPet = tempPet;
+			}
 			petInfo.saveConfig();
 
 		}
@@ -69,8 +72,8 @@ public class PlayerListener {
 			String displayName = petInfo.currentPet.getDisplayName().replaceAll("\\[Lvl \\d*\\]", "[Lvl " + level + "]");
 			petInfo.currentPet.setDisplayName(displayName);
 			petInfo.currentXp = 0;
-			//int currentLevelXp= Helper.getXpToNextLevel(petInfo.currentPet.getDisplayName().split(" ")[2].substring(0, 2), petInfo.currentPet.getPetLevel());
-			//petInfo.currentPet.setCurrentXp(petInfo.currentPet.getCurrentXp()-currentLevelXp);
+			// int currentLevelXp= Helper.getXpToNextLevel(petInfo.currentPet.getDisplayName().split(" ")[2].substring(0, 2), petInfo.currentPet.getPetLevel());
+			// petInfo.currentPet.setCurrentXp(petInfo.currentPet.getCurrentXp()-currentLevelXp);
 			petInfo.currentPet.setCurrentXp(0);
 			petInfo.currentPet.setPetLevel(Integer.parseInt(level));
 			int nextLevelXp = Helper.getXpToNextLevel(petInfo.currentPet.getDisplayName().split(" ")[2].substring(0, 2), petInfo.currentPet.getPetLevel() + 1);
@@ -83,10 +86,10 @@ public class PlayerListener {
 			petInfo.saveConfig();
 		}
 		// 2 : 'Status' message, displayed above action bar, where song notifications are.
-		if (e.type == 2 && petInfo.currentPet.getPetLevel()<100) {
-			// §c1755/1755? §3+5.4 Farming (1,146,767.2/1,200,000) §b354/354? Mana§r
+		if (e.type == 2 && petInfo.currentPet.getPetLevel() < 100) {
+			// Â§c1755/1755? Â§3+5.4 Farming (1,146,767.2/1,200,000) Â§b354/354? ManaÂ§r
 			String[] infoGroups = message.split("     ");
-			// §3+5.4 Farming (1,146,335.2/1,200,000)
+			// Â§3+5.4 Farming (1,146,335.2/1,200,000)
 			if (infoGroups != null && infoGroups.length > 1) {
 				Matcher matcher = XP_GAIN_AND_SKILL_PATTERN.matcher(infoGroups[1]);
 				if (matcher.matches()) {
