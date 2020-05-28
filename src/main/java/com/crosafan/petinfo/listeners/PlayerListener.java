@@ -67,10 +67,18 @@ public class PlayerListener {
 		} else if (message.contains("levelled up to level") && !petInfo.currentPet.getDisplayName().equals("No pet selected!")) {
 			petInfo.currentPet.levelUp(message);
 			petInfo.saveConfig();
-		} else if (message.contains("You despawned your") || message.contains("Switching to profile")) {
+		} else if (message.contains("You despawned your")) {
 			petInfo.currentPet.setDisplayName("No pet selected!");
+			petInfo.currentPet.setCurrentProgress(0.0f);
 			petInfo.saveConfig();
-		} else if (message.contains("SKILL LEVEL UP")) {
+		} else if (message.contains("Switching to profile")) {
+			petInfo.currentPet.setDisplayName("No pet selected!");
+			petInfo.currentPet.setCurrentProgress(0.0f);
+			petInfo.tamingLevel = 0;
+			petInfo.saveConfig();
+		}
+
+		else if (message.contains("SKILL LEVEL UP")) {
 			Matcher matcher = TAMING_SKILL_LEVEL_UP_PATTERN.matcher(message);
 			if (!matcher.matches()) {
 				return;
@@ -81,7 +89,7 @@ public class PlayerListener {
 		// 2 : 'Status' message, displayed above action bar, where song notifications are.
 		else if (e.type == 2 && petInfo.currentPet.getPetLevel() < 100) {
 
-			if (petInfo.currentPet.getDisplayName().equals("No pet selected")) {
+			if (petInfo.currentPet.getDisplayName().equals("No pet selected!")) {
 				return;
 			}
 
@@ -124,6 +132,7 @@ public class PlayerListener {
 			float newXp = petInfo.currentPet.getCurrentXp() + xpGain;
 			petInfo.currentPet.setCurrentXp(newXp);
 			float progress = (petInfo.currentPet.getCurrentXp() / petInfo.currentPet.getXpNeededForNextLevel()) * 100.0f;
+			progress = Helper.roundToNDecimals(progress, 1);
 			petInfo.currentPet.setCurrentProgress(progress);
 
 		}

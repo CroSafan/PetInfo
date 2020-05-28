@@ -119,7 +119,7 @@ public class Pet {
 	}
 
 	public void setCurrentProgress(float currentProgress) {
-		this.currentProgress = Helper.roundToNDecimals(currentProgress, 1);
+		this.currentProgress = currentProgress;
 	}
 
 	public String getHeldItemType() {

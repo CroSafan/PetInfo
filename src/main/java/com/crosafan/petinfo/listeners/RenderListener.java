@@ -56,7 +56,7 @@ public class RenderListener {
 
 	public void renderPet() {
 		try {
-			renderer.drawString(petInfo.currentPet.getDisplayName() + " " + String.valueOf(petInfo.currentPet.getCurrentProgress()) + "%", petInfo.guiLocation[0], petInfo.guiLocation[1], textColor, false);
+			renderer.drawString(petInfo.currentPet.getDisplayName() + " §f" + String.valueOf(petInfo.currentPet.getCurrentProgress()) + "%", petInfo.guiLocation[0], petInfo.guiLocation[1], textColor, false);
 		} catch (NullPointerException npe) {
 			petInfo.logger.error(npe.getLocalizedMessage());
 
