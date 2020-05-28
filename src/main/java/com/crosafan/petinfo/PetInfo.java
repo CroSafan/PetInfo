@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.logging.log4j.Logger;
 
 import com.crosafan.petinfo.commands.PetInfoCommand;
@@ -50,12 +54,14 @@ public class PetInfo {
 	private static File configFile;
 	public static Logger logger;
 
+	private ScheduledExecutorService autoSaveExecutor;
+
 	@Mod.EventHandler
 
 	public static void PreInit(FMLPreInitializationEvent event) {
 		logger = event.getModLog();
 
-		loadConfig();
+		
 	}
 
 	@Mod.EventHandler
@@ -70,7 +76,10 @@ public class PetInfo {
 		MinecraftForge.EVENT_BUS.register(playerListener);
 		MinecraftForge.EVENT_BUS.register(renderListener);
 		
+		loadConfig();
 		
+		
+		scheduleFileSave(true, 120);
 
 	}
 
@@ -101,7 +110,7 @@ public class PetInfo {
 			// get the property value and print it out
 			guiLocation[0] = Integer.valueOf(prop.getProperty("petinfo.guixpos", "5"));
 			guiLocation[1] = Integer.valueOf(prop.getProperty("petinfo.guiypos", "5"));
-			tamingLevel = Integer.valueOf(prop.getProperty("petinfo.taminglevel", "1"));
+			tamingLevel = Integer.valueOf(prop.getProperty("petinfo.taminglevel", "0"));
 			currentPet.setDisplayName(prop.getProperty("petinfo.currentSelectedPet", "No pet selected!"));
 			currentPet.setHeldItemType(prop.getProperty("petinfo.helditemtype", ""));
 			currentPet.setHeldItemPetXpBoost(Float.parseFloat(prop.getProperty("petinfo.helditempetxpboost", "0.0")));
@@ -117,25 +126,42 @@ public class PetInfo {
 	}
 
 	public static void saveConfig() {
-		try (OutputStream output = new FileOutputStream(CONFIG_PATH)) {
+		new Thread(() -> {
+			try (OutputStream output = new FileOutputStream(CONFIG_PATH)) {
 
-			Properties prop = new Properties();
+				Properties prop = new Properties();
 
-			prop.setProperty("petinfo.guixpos", String.valueOf(guiLocation[0]));
-			prop.setProperty("petinfo.guiypos", String.valueOf(guiLocation[1]));
-			prop.setProperty("petinfo.taminglevel", String.valueOf(tamingLevel));
-			prop.setProperty("petinfo.currentSelectedPet", currentPet.getDisplayName());
-			prop.setProperty("petinfo.helditemtype", currentPet.getHeldItemType());
-			prop.setProperty("petinfo.helditempetxpboost", String.valueOf(currentPet.getHeldItemPetXpBoost()));
-			prop.setProperty("petinfo.pettype", currentPet.getPetType());
-			prop.setProperty("petinfo.currentprogress", String.valueOf(currentPet.getCurrentProgress()));
-			prop.setProperty("petinfo.petcurrentxp", String.valueOf(currentPet.getCurrentXp()));
-			prop.setProperty("petinfo.petlevel", String.valueOf(currentPet.getPetLevel()));
-			prop.setProperty("petinfo.xpNeededForNextLevel", String.valueOf(currentPet.getXpNeededForNextLevel()));
-			prop.store(output, null);
+				prop.setProperty("petinfo.guixpos", String.valueOf(guiLocation[0]));
+				prop.setProperty("petinfo.guiypos", String.valueOf(guiLocation[1]));
+				prop.setProperty("petinfo.taminglevel", String.valueOf(tamingLevel));
+				prop.setProperty("petinfo.currentSelectedPet", currentPet.getDisplayName());
+				prop.setProperty("petinfo.helditemtype", currentPet.getHeldItemType());
+				prop.setProperty("petinfo.helditempetxpboost", String.valueOf(currentPet.getHeldItemPetXpBoost()));
+				prop.setProperty("petinfo.pettype", currentPet.getPetType());
+				prop.setProperty("petinfo.currentprogress", String.valueOf(currentPet.getCurrentProgress()));
+				prop.setProperty("petinfo.petcurrentxp", String.valueOf(currentPet.getCurrentXp()));
+				prop.setProperty("petinfo.petlevel", String.valueOf(currentPet.getPetLevel()));
+				prop.setProperty("petinfo.xpNeededForNextLevel", String.valueOf(currentPet.getXpNeededForNextLevel()));
+				prop.store(output, null);
+				System.out.println("Config saved");
 
-		} catch (IOException io) {
-			io.printStackTrace();
+			} catch (IOException io) {
+				io.printStackTrace();
+			}
+		}).start();
+	}
+
+	void scheduleFileSave(boolean toggle, int delay) {
+		if (autoSaveExecutor != null && !autoSaveExecutor.isShutdown()) {
+			autoSaveExecutor.shutdownNow();
+		}
+		if (toggle) {
+			autoSaveExecutor = Executors.newSingleThreadScheduledExecutor();
+			autoSaveExecutor.scheduleAtFixedRate(() -> {
+				if (isInSkyblock && currentPet != null) {
+					saveConfig();
+				}
+			}, 0, delay, TimeUnit.SECONDS);
 		}
 	}
 

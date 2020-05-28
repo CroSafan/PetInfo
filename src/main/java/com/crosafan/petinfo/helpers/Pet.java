@@ -1,10 +1,17 @@
 package com.crosafan.petinfo.helpers;
 
-public class Pet {
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-	public Pet() {
-		this.displayName = "No pet selected!";
-	}
+import com.crosafan.petinfo.PetInfo;
+
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.StringUtils;
+import net.minecraftforge.common.util.Constants;
+
+public class Pet {
 
 	private String displayName = "";
 	private String petType = "";
@@ -13,7 +20,57 @@ public class Pet {
 	private String heldItemType = "";
 	private float heldItemPetXpBoost = 0.0f;
 	private int petLevel = 1;
-	private int xpNeededForNextLevel=0;
+	private int xpNeededForNextLevel = 0;
+
+	public Pet() {
+		this.displayName = "No pet selected!";
+	}
+
+	public Pet(ItemStack hoveredItem) {
+
+		NBTTagCompound display = hoveredItem.getSubCompound("display", false);
+
+		if (display.hasKey("Lore")) {
+			NBTTagList lore = display.getTagList("Lore", Constants.NBT.TAG_STRING);
+			String petType = lore.getStringTagAt(0).split(" ")[0];
+			float currentProgress = 0.0f;
+			float currentXp = 0.0f;
+			String heldItemType = "";
+			float heldItemPetXpBoost = 0.0f;
+
+			for (int i = 0; i < lore.tagCount(); i++) {
+				String currentLine = lore.getStringTagAt(i);
+				if (currentProgress == 0.0f) {
+					currentProgress = Helper.matchCurrentProgresForPet(currentLine);
+				}
+				if (currentXp == 0.0f) {
+					currentXp = Helper.matchCurrentXpForPet(currentLine);
+				}
+				if (heldItemType.isEmpty()) {
+					heldItemType = Helper.matchHeldItemTypeForPet(currentLine);
+				}
+				if (heldItemPetXpBoost == 0.0f) {
+					heldItemPetXpBoost = Helper.matchHeldItemPetXpBoosForPet(currentLine);
+				}
+
+			}
+			// §7[Lvl 74] §6Rabbit
+			String rarity = hoveredItem.getDisplayName().split(" ")[2].substring(0, 2);
+			int petLevel = Integer.parseInt(hoveredItem.getDisplayName().split(" ")[1].replace("]", ""));
+			int nextLevelXp = Helper.getXpToNextLevel(rarity, petLevel + 1);
+			this.xpNeededForNextLevel = nextLevelXp;
+			this.petLevel = petLevel;
+			this.petType = StringUtils.stripControlCodes(petType);
+			this.currentProgress = currentProgress;
+			this.currentXp = currentXp;
+			this.heldItemType = heldItemType;
+			this.heldItemPetXpBoost = heldItemPetXpBoost;
+
+		}
+
+		this.displayName = hoveredItem.getDisplayName();
+
+	}
 
 	public int getXpNeededForNextLevel() {
 		return xpNeededForNextLevel;
@@ -54,7 +111,7 @@ public class Pet {
 
 	public void setCurrentXp(float currentXp) {
 
-		this.currentXp = Helper.roundToNDecimals(currentXp, 1);
+		this.currentXp = currentXp;
 	}
 
 	public float getCurrentProgress() {
@@ -79,6 +136,15 @@ public class Pet {
 
 	public void setHeldItemPetXpBoost(float heldItemPetXpBoost) {
 		this.heldItemPetXpBoost = heldItemPetXpBoost;
+	}
+
+	public void levelUp(String message) {
+		int level = Integer.parseInt(message.replaceAll("\\D", ""));
+		this.petLevel = level;
+		this.displayName = this.displayName.replaceAll("\\[Lvl \\d*\\]", "[Lvl " + level + "]");
+		this.currentXp = 0.0f;
+		this.xpNeededForNextLevel = Helper.getXpToNextLevel(this.displayName.split(" ")[2].substring(0, 2), this.petLevel + 1);
+
 	}
 
 }

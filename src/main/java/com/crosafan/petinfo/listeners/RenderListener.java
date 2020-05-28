@@ -2,11 +2,11 @@ package com.crosafan.petinfo.listeners;
 
 import com.crosafan.petinfo.PetInfo;
 import com.crosafan.petinfo.gui.Gui;
-import com.crosafan.petinfo.helpers.Helper;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraftforge.client.GuiIngameForge;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -33,7 +33,12 @@ public class RenderListener {
 
 		if ((event.type == RenderGameOverlayEvent.ElementType.EXPERIENCE || event.type == RenderGameOverlayEvent.ElementType.JUMPBAR)) {
 			if (petInfo.isInSkyblock) {
-				if (petInfo.currentPet != null) {
+
+				if (petInfo.tamingLevel == 0) {
+					renderTamingWarning();
+				}
+
+				else if (petInfo.currentPet != null) {
 					renderPet();
 				}
 			}
@@ -50,13 +55,33 @@ public class RenderListener {
 	}
 
 	public void renderPet() {
-			try {
-				renderer.drawString(petInfo.currentPet.getDisplayName() + " " + String.valueOf(petInfo.currentPet.getCurrentProgress()) + "%", petInfo.guiLocation[0], petInfo.guiLocation[1], textColor, false);
-			}catch(NullPointerException npe) {
-				petInfo.logger.error(npe.getLocalizedMessage());
-	
-			}
-		
+		try {
+			renderer.drawString(petInfo.currentPet.getDisplayName() + " " + String.valueOf(petInfo.currentPet.getCurrentProgress()) + "%", petInfo.guiLocation[0], petInfo.guiLocation[1], textColor, false);
+		} catch (NullPointerException npe) {
+			petInfo.logger.error(npe.getLocalizedMessage());
+
+		}
+
+	}
+
+	public void renderTamingWarning() {
+		String tamingNotDetected = "TAMING LEVEL NOT DETECTED!";
+
+		int width = renderer.getStringWidth(tamingNotDetected);
+		ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
+		int scaledWidth = sr.getScaledWidth();
+		int scaledHeight = sr.getScaledHeight();
+		int stringWidth = renderer.getStringWidth(tamingNotDetected);
+		GlStateManager.pushMatrix();
+		// centering
+		GlStateManager.translate((float) (scaledWidth / 2), (float) (scaledHeight / 2), 0.0F);
+		GlStateManager.pushMatrix();
+		GlStateManager.scale(2.5F, 2.5F, 2.5F);
+
+		renderer.drawString(tamingNotDetected, (-stringWidth / 2), 0, redColor);
+
+		GlStateManager.popMatrix();// for translate
+		GlStateManager.popMatrix();// for scale
 
 	}
 

@@ -24,6 +24,7 @@ public class Helper {
 	private static final Pattern PET_LEVEL_PROGRESS_PATTERN = Pattern.compile("§7Progress to Level (\\d+): §e(\\d*\\.?\\d*)%");
 	private static final Pattern PET_CURRENT_XP_PATTERN = Pattern.compile(".* (§e([0-9.,]+)§6/§e([0-9.,]+)k?)");
 	private static final Pattern PET_HELD_ITEM = Pattern.compile("§6Held Item: (§f|§a|§9|§5)(Farming|Mining|Combat|Foraging|Fishing|All) (Skills )?Exp Boost");
+
 	private static int[][] petLevelTable = { { 0, 0, 0, 0, 0 }, { 100, 175, 275, 440, 660 }, { 110, 190, 300, 490, 730 }, { 120, 210, 330, 540, 800 }, { 130, 230, 360, 600, 880 }, { 145, 250, 400, 660, 960 }, { 160, 275, 440, 730, 1050 },
 			{ 175, 300, 490, 800, 1150 }, { 190, 330, 540, 880, 1260 }, { 210, 360, 600, 960, 1380 }, { 230, 400, 660, 1050, 1510 }, { 250, 440, 730, 1150, 1650 }, { 275, 490, 800, 1260, 1800 }, { 300, 540, 880, 1380, 1960 },
 			{ 330, 600, 960, 1510, 2130 }, { 360, 660, 1050, 1650, 2310 }, { 400, 730, 1150, 1800, 2500 }, { 440, 800, 1260, 1960, 2700 }, { 490, 880, 1380, 2130, 2920 }, { 540, 960, 1510, 2310, 3160 }, { 600, 1050, 1650, 2500, 3420 },
@@ -67,75 +68,6 @@ public class Helper {
 		return isInSkyblock;
 	}
 
-	public static Pet parseItemStackToPet(ItemStack hoveredItem) throws ParseException {
-		Pet pet = new Pet();
-		try {
-
-			NBTTagCompound display = hoveredItem.getSubCompound("display", false);
-
-			if (display.hasKey("Lore")) {
-				NBTTagList lore = display.getTagList("Lore", Constants.NBT.TAG_STRING);
-				String petType = lore.getStringTagAt(0).split(" ")[0];
-				float currentProgress = 0.0f;
-				float currentXp = 0.0f;
-				String heldItemType = "";
-				float heldItemPetXpBoost = 0.0f;
-
-				for (int i = 0; i < lore.tagCount(); i++) {
-					String currentLine = lore.getStringTagAt(i);
-
-					Matcher matcher = PET_LEVEL_PROGRESS_PATTERN.matcher(currentLine);
-					if (matcher.matches()) {
-						currentProgress = Float.parseFloat(matcher.group(2));
-					}
-					matcher.reset();
-					matcher = PET_CURRENT_XP_PATTERN.matcher(currentLine);
-					if (matcher.matches()) {
-						currentXp = Float.parseFloat(matcher.group(2).replace(",", ""));
-					}
-					matcher.reset();
-					matcher = PET_HELD_ITEM.matcher(currentLine);
-					if (matcher.matches()) {
-						heldItemType = matcher.group(2);
-						// §f|§a|§9|§5
-						if (matcher.group(1).equals("§f")) {
-							heldItemPetXpBoost = 0.20f;
-						} else if (matcher.group(1).equals("§a")) {
-							heldItemPetXpBoost = 0.30f;
-						} else if (matcher.group(1).equals("§9")) {
-							heldItemPetXpBoost = 0.40f;
-						} else if (matcher.group(1).equals("§5")) {
-							heldItemPetXpBoost = 0.50f;
-						}
-						if (heldItemType.equals("All")) {
-							heldItemPetXpBoost = 0.10f;
-						}
-
-					}
-
-				}
-				String rarity = hoveredItem.getDisplayName().split(" ")[2].substring(0, 2);
-				int petLevel = Integer.parseInt(hoveredItem.getDisplayName().split(" ")[1].replace("]", ""));
-				int nextLevelXp = Helper.getXpToNextLevel(rarity, petLevel + 1);
-				pet.setXpNeededForNextLevel(nextLevelXp);
-				pet.setPetLevel(petLevel);
-
-				pet.setPetType(StringUtils.stripControlCodes(petType));
-				pet.setCurrentProgress(currentProgress);
-				pet.setCurrentXp(currentXp);
-				pet.setHeldItemType(heldItemType);
-				pet.setHeldItemPetXpBoost(heldItemPetXpBoost);
-			}
-
-			pet.setDisplayName(hoveredItem.getDisplayName());
-		} catch (Exception ex) {
-			PetInfo.logger.info(ex.getLocalizedMessage());
-			PetInfo.logger.error(ex.getLocalizedMessage());
-
-		}
-		return pet;
-	}
-
 	public static int getLevelFromRomanNumerals(String romanNumeral) {
 		for (int i = 0; i < romanNumeralsTo50.length; i++) {
 			if (romanNumeralsTo50[i].equals(romanNumeral)) {
@@ -170,6 +102,58 @@ public class Helper {
 
 		return petLevelTable[level - 1][rarityIndex];
 
+	}
+
+	public static float matchCurrentProgresForPet(String currentLine) {
+		float currentProgress = 0.0f;
+		Matcher matcher = PET_LEVEL_PROGRESS_PATTERN.matcher(currentLine);
+		if (matcher.matches()) {
+			currentProgress = Float.parseFloat(matcher.group(2));
+		}
+		return currentProgress;
+
+	}
+
+	public static float matchCurrentXpForPet(String currentLine) {
+		float currentXp = 0.0f;
+		Matcher matcher = PET_CURRENT_XP_PATTERN.matcher(currentLine);
+		if (matcher.matches()) {
+			currentXp = Float.parseFloat(matcher.group(2).replace(",", ""));
+		}
+		return currentXp;
+	}
+
+	public static String matchHeldItemTypeForPet(String currentLine) {
+		String heldItemType = "";
+		Matcher matcher = PET_HELD_ITEM.matcher(currentLine);
+		if (matcher.matches()) {
+			heldItemType = matcher.group(2);
+
+		}
+		return heldItemType;
+	}
+
+	public static float matchHeldItemPetXpBoosForPet(String currentLine) {
+		float heldItemPetXpBoost = 0.0f;
+		Matcher matcher = PET_HELD_ITEM.matcher(currentLine);
+		if (matcher.matches()) {
+			String heldItemType = matcher.group(2);
+			// §f|§a|§9|§5
+			if (matcher.group(1).equals("§f")) {
+				heldItemPetXpBoost = 0.20f;
+			} else if (matcher.group(1).equals("§a")) {
+				heldItemPetXpBoost = 0.30f;
+			} else if (matcher.group(1).equals("§9")) {
+				heldItemPetXpBoost = 0.40f;
+			} else if (matcher.group(1).equals("§5")) {
+				heldItemPetXpBoost = 0.50f;
+			}
+			if (heldItemType.equals("All")) {
+				heldItemPetXpBoost = 0.10f;
+			}
+
+		}
+		return heldItemPetXpBoost;
 	}
 
 }

@@ -37,22 +37,19 @@ public class PlayerListener {
 
 	@SubscribeEvent()
 	public void onItemTooltip(ItemTooltipEvent e) {
-		if (petInfo.isInSkyblock) {
-			if (Helper.isPetMenuOpen()) {
-				ItemStack hoveredItem = e.itemStack;
-				System.out.println(hoveredItem.getDisplayName());
-				Matcher matcher = PET_NAME_PATTERN.matcher(hoveredItem.getDisplayName());
-				if (matcher.matches()) {
-					System.out.println("Here ");
-					try {
-						tempPet = Helper.parseItemStackToPet(hoveredItem);
-					} catch (ParseException e1) {
-						petInfo.logger.info(e1.getMessage());
-					}
-				}
-			}
+		if (!petInfo.isInSkyblock || !Helper.isPetMenuOpen()) {
+			return;
 		}
 
+		ItemStack hoveredItem = e.itemStack;
+		Matcher matcher = PET_NAME_PATTERN.matcher(hoveredItem.getDisplayName());
+		if (matcher.matches()) {
+			try {
+				tempPet = new Pet(hoveredItem);
+			} catch (Exception e1) {
+				petInfo.logger.error(e1.getMessage());
+			}
+		}
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGH)
@@ -65,68 +62,60 @@ public class PlayerListener {
 			}
 			petInfo.saveConfig();
 
-		}
-
-		if (message.contains("levelled up to level") && !petInfo.currentPet.getDisplayName().equals("No pet selected!")) {
-			String level = message.replaceAll("\\D", "");
-			String displayName = petInfo.currentPet.getDisplayName().replaceAll("\\[Lvl \\d*\\]", "[Lvl " + level + "]");
-			petInfo.currentPet.setDisplayName(displayName);
-			petInfo.currentXp = 0;
-			// int currentLevelXp= Helper.getXpToNextLevel(petInfo.currentPet.getDisplayName().split(" ")[2].substring(0, 2), petInfo.currentPet.getPetLevel());
-			// petInfo.currentPet.setCurrentXp(petInfo.currentPet.getCurrentXp()-currentLevelXp);
-			petInfo.currentPet.setCurrentXp(0);
-			petInfo.currentPet.setPetLevel(Integer.parseInt(level));
-			int nextLevelXp = Helper.getXpToNextLevel(petInfo.currentPet.getDisplayName().split(" ")[2].substring(0, 2), petInfo.currentPet.getPetLevel() + 1);
-			petInfo.currentPet.setXpNeededForNextLevel(nextLevelXp);
+		} else if (message.contains("levelled up to level") && !petInfo.currentPet.getDisplayName().equals("No pet selected!")) {
+			petInfo.currentPet.levelUp(message);
 			petInfo.saveConfig();
-		}
-
-		if (message.contains("You despawned your")) {
+		} else if (message.contains("You despawned your")) {
 			petInfo.currentPet.setDisplayName("No pet selected!");
 			petInfo.saveConfig();
 		}
 		// 2 : 'Status' message, displayed above action bar, where song notifications are.
-		if (e.type == 2 && petInfo.currentPet.getPetLevel() < 100) {
+		else if (e.type == 2 && petInfo.currentPet.getPetLevel() < 100) {
+
+			if (petInfo.currentPet.getDisplayName().equals("No pet selected")) {
+				return;
+			}
+
 			// §c1755/1755? §3+5.4 Farming (1,146,767.2/1,200,000) §b354/354? Mana§r
 			String[] infoGroups = message.split("     ");
 			// §3+5.4 Farming (1,146,335.2/1,200,000)
-			if (infoGroups != null && infoGroups.length > 1) {
-				Matcher matcher = XP_GAIN_AND_SKILL_PATTERN.matcher(infoGroups[1]);
-				if (matcher.matches()) {
+			if (infoGroups == null || infoGroups.length <= 1) {
+				return;
+			}
+			Matcher matcher = XP_GAIN_AND_SKILL_PATTERN.matcher(infoGroups[1]);
+			if (!matcher.matches()) {
+				return;
+			}
 
-					String previousSkill = petInfo.currentSkill;
-					petInfo.currentSkill = matcher.group(2);
-					// don't have current xp loaded or we are switching to a different skill
-					if (petInfo.currentXp == 0 || !petInfo.currentSkill.equals(previousSkill)) {
-						// for the first time, when we don't have the current xp loaded
-						petInfo.gainedXp = Float.parseFloat(matcher.group(1));
-						petInfo.currentXp = Float.parseFloat(matcher.group(4).replace(",", ""));
+			String previousSkill = petInfo.currentSkill;
+			petInfo.currentSkill = matcher.group(2);
+			Float currentXp = Float.parseFloat(matcher.group(4).replace(",", ""));
+			// don't have current xp loaded or we are switching to a different skill
+			if (petInfo.currentXp == 0 || !petInfo.currentSkill.equals(previousSkill)) {
+				// for the first time, when we don't have the current xp loaded
+				petInfo.gainedXp = Float.parseFloat(matcher.group(1));
+				petInfo.currentXp = currentXp;
 
-					} else {
-						// prevents adding the same xp gain multiple time
-						if (petInfo.currentXp == Double.parseDouble(matcher.group(4).replace(",", ""))) {
-							petInfo.gainedXp = 0.0f;
+			} else {
+				// prevents adding the same xp gain multiple time
+				if (petInfo.currentXp == currentXp) {
+					petInfo.gainedXp = 0.0f;
 
-						} else {
+				} else {
 
-							// previous saved current xp - current xp
-							petInfo.gainedXp = Float.parseFloat(matcher.group(4).replace(",", "")) - petInfo.currentXp;
-							// setting currentXp for the next iteration
-							petInfo.currentXp = Float.parseFloat(matcher.group(4).replace(",", ""));
-
-						}
-
-					}
-					float xpGain = calculateXpGain();
-					float currentXp = petInfo.currentPet.getCurrentXp() + xpGain;
-					currentXp = Helper.roundToNDecimals(currentXp, 1);
-					petInfo.currentPet.setCurrentXp(currentXp);
-					float progress = (petInfo.currentPet.getCurrentXp() / petInfo.currentPet.getXpNeededForNextLevel()) * 100.0f;
-					progress = Helper.roundToNDecimals(progress, 1);
-					petInfo.currentPet.setCurrentProgress(progress);
+					// current xp - previous current xp
+					petInfo.gainedXp = currentXp - petInfo.currentXp;
+					// setting currentXp for the next iteration
+					petInfo.currentXp = currentXp;
 
 				}
+
 			}
+			float xpGain = calculateXpGain();
+			float newXp = petInfo.currentPet.getCurrentXp() + xpGain;
+			petInfo.currentPet.setCurrentXp(newXp);
+			float progress = (petInfo.currentPet.getCurrentXp() / petInfo.currentPet.getXpNeededForNextLevel()) * 100.0f;
+			petInfo.currentPet.setCurrentProgress(progress);
 
 		}
 
@@ -174,6 +163,7 @@ public class PlayerListener {
 
 						IInventory inv = chest.getLowerChestInventory();
 						if (inv.getName().contains("Your Skills")) {
+							// 33 index of taming skill slot
 							ItemStack tamingSkill = inv.getStackInSlot(33);
 							petInfo.tamingLevel = Helper.getLevelFromRomanNumerals(tamingSkill.getDisplayName().split(" ")[1]);
 						}
