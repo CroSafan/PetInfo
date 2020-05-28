@@ -25,6 +25,8 @@ public class PlayerListener {
 
 	private static final Pattern XP_GAIN_AND_SKILL_PATTERN = Pattern.compile("§\\d\\+(\\d*\\.?\\d*) (Farming|Mining|Combat|Foraging|Fishing|Enchanting|Alchemy) (\\(([0-9.,]+)/([0-9.,]+)\\))");
 	private static final Pattern PET_NAME_PATTERN = Pattern.compile("§\\d\\[Lvl \\d+\\] §\\d.+");
+	private static final Pattern TAMING_SKILL_LEVEL_UP_PATTERN = Pattern.compile("\\s*§b§lSKILL LEVEL UP §3Taming (.+(§3(.+)))");
+
 	private PetInfo petInfo;
 
 	private Pet tempPet;
@@ -65,8 +67,15 @@ public class PlayerListener {
 		} else if (message.contains("levelled up to level") && !petInfo.currentPet.getDisplayName().equals("No pet selected!")) {
 			petInfo.currentPet.levelUp(message);
 			petInfo.saveConfig();
-		} else if (message.contains("You despawned your")) {
+		} else if (message.contains("You despawned your") || message.contains("Switching to profile")) {
 			petInfo.currentPet.setDisplayName("No pet selected!");
+			petInfo.saveConfig();
+		} else if (message.contains("SKILL LEVEL UP")) {
+			Matcher matcher = TAMING_SKILL_LEVEL_UP_PATTERN.matcher(message);
+			if (!matcher.matches()) {
+				return;
+			}
+			petInfo.tamingLevel = Integer.parseInt(matcher.group(3));
 			petInfo.saveConfig();
 		}
 		// 2 : 'Status' message, displayed above action bar, where song notifications are.
