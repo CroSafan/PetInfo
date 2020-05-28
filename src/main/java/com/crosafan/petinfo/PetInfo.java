@@ -33,7 +33,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class PetInfo {
 	public static final String MOD_NAME = "Pet info";
 	public static final String MODID = "petinfo";
-	public static final String VERSION = "1.0";
+	public static final String VERSION = "1.1";
 	private static final String CONFIG_PATH = "petinfo.properties";
 
 	public static boolean openGui = false;
