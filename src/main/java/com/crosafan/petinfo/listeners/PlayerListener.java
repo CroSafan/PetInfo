@@ -24,7 +24,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 public class PlayerListener {
 
 	private static final Pattern XP_GAIN_AND_SKILL_PATTERN = Pattern.compile("§\\d\\+(\\d*\\.?\\d*) (Farming|Mining|Combat|Foraging|Fishing|Enchanting|Alchemy) (\\(([0-9.,]+)/([0-9.,]+)\\))");
-	private static final Pattern PET_NAME_PATTERN = Pattern.compile("§\\d\\[Lvl \\d+\\] §\\d.+");
+	private static final Pattern PET_NAME_PATTERN = Pattern.compile("§\\d\\[Lvl \\d+\\] §.+");
 	private static final Pattern TAMING_SKILL_LEVEL_UP_PATTERN = Pattern.compile("\\s*§b§lSKILL LEVEL UP §3Taming (.+(§3(.+)))");
 
 	private PetInfo petInfo;
@@ -132,7 +132,7 @@ public class PlayerListener {
 			float newXp = petInfo.currentPet.getCurrentXp() + xpGain;
 			petInfo.currentPet.setCurrentXp(newXp);
 			float progress = (petInfo.currentPet.getCurrentXp() / petInfo.currentPet.getXpNeededForNextLevel()) * 100.0f;
-			progress = Helper.roundToNDecimals(progress, 1);
+
 			petInfo.currentPet.setCurrentProgress(progress);
 
 		}

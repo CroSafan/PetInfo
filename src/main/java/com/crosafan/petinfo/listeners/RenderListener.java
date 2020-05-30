@@ -2,6 +2,7 @@ package com.crosafan.petinfo.listeners;
 
 import com.crosafan.petinfo.PetInfo;
 import com.crosafan.petinfo.gui.Gui;
+import com.crosafan.petinfo.helpers.Helper;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -56,7 +57,8 @@ public class RenderListener {
 
 	public void renderPet() {
 		try {
-			renderer.drawString(petInfo.currentPet.getDisplayName() + " §f" + String.valueOf(petInfo.currentPet.getCurrentProgress()) + "%", petInfo.guiLocation[0], petInfo.guiLocation[1], textColor, true);
+			float progress = Helper.roundToNDecimals(petInfo.currentPet.getCurrentProgress(), 1);
+			renderer.drawString(petInfo.currentPet.getDisplayName() + " §f" + String.valueOf(progress) + "%", petInfo.guiLocation[0], petInfo.guiLocation[1], textColor, true);
 		} catch (NullPointerException npe) {
 			petInfo.logger.error(npe.getLocalizedMessage());
 
