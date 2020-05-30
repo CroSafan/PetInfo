@@ -8,7 +8,7 @@ When first launching the game open your skill menu to register your current Tami
 Use command: "/petinfo gui" to change the text location  
 
 # Credit
-Big thank you to Biscuit (+ every contributor) and symt for open sourcing their projects.
+Big thank you to Biscuit (+ every contributor) and symt ffor their work and their projects.
 As I have never made a Minecraft mod, their repos were a huge learning resource and were used as a refrenece for a lot of things.
 
 Biscuit: (https://github.com/BiscuitDevelopment/SkyblockAddons)  

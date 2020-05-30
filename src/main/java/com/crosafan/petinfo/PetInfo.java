@@ -143,7 +143,6 @@ public class PetInfo {
 				prop.setProperty("petinfo.petlevel", String.valueOf(currentPet.getPetLevel()));
 				prop.setProperty("petinfo.xpNeededForNextLevel", String.valueOf(currentPet.getXpNeededForNextLevel()));
 				prop.store(output, null);
-				System.out.println("Config saved");
 
 			} catch (IOException io) {
 				io.printStackTrace();
