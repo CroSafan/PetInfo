@@ -183,9 +183,14 @@ public class PlayerListener {
 						if (inv.getName().contains("Your Skills")) {
 							// 32 index of taming skill slot
 							ItemStack tamingSkill = inv.getStackInSlot(32);
-							petInfo.tamingLevel = Helper.getLevelFromRomanNumerals(tamingSkill.getDisplayName().split(" ")[1]);
-							
-						
+							String[] tamingSplitted = tamingSkill.getDisplayName().trim().split(" ");
+							if (tamingSplitted.length <= 1) {
+								petInfo.tamingLevel = 1;
+							} else {
+								System.out.println(tamingSkill.getDisplayName());
+								petInfo.tamingLevel = Helper.getLevelFromRomanNumerals(tamingSplitted[1]);
+							}
+							petInfo.saveConfig();
 						}
 					}
 				}
