@@ -181,9 +181,11 @@ public class PlayerListener {
 
 						IInventory inv = chest.getLowerChestInventory();
 						if (inv.getName().contains("Your Skills")) {
-							// 33 index of taming skill slot
-							ItemStack tamingSkill = inv.getStackInSlot(33);
+							// 32 index of taming skill slot
+							ItemStack tamingSkill = inv.getStackInSlot(32);
 							petInfo.tamingLevel = Helper.getLevelFromRomanNumerals(tamingSkill.getDisplayName().split(" ")[1]);
+							
+						
 						}
 					}
 				}
