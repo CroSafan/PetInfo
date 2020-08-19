@@ -28,7 +28,7 @@ public class PetInfoCommand extends CommandBase {
 	public void processCommand(ICommandSender sender, String[] args) throws CommandException {
 		if(args.length>0) {
 			switch(args[0]) {
-			case "gui":
+			case "-gui":
 				PetInfo.openGui=true;
 				break;
 			case "-display":
