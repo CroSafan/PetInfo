@@ -45,6 +45,7 @@ public class PetInfo {
 	public static float currentXp = 0.0f;
 	public static float gainedXp = 0.0f;
 	public static int tamingLevel = 0;
+	public static boolean displayIcon=false;
 
 	public static PetInfo instance;
 
@@ -61,7 +62,6 @@ public class PetInfo {
 	public static void PreInit(FMLPreInitializationEvent event) {
 		logger = event.getModLog();
 
-		
 	}
 
 	@Mod.EventHandler
@@ -75,10 +75,9 @@ public class PetInfo {
 
 		MinecraftForge.EVENT_BUS.register(playerListener);
 		MinecraftForge.EVENT_BUS.register(renderListener);
-		
+
 		loadConfig();
-		
-		
+
 		scheduleFileSave(true, 120);
 
 	}
@@ -119,6 +118,8 @@ public class PetInfo {
 			currentPet.setCurrentXp(Float.parseFloat(prop.getProperty("petinfo.petcurrentxp", "0.0")));
 			currentPet.setPetLevel(Integer.parseInt(prop.getProperty("petinfo.petlevel", "1")));
 			currentPet.setXpNeededForNextLevel(Integer.parseInt(prop.getProperty("petinfo.xpNeededForNextLevel", "0")));
+			displayIcon=prop.getProperty("petinfo.displayIcon","false").equals("true")?true:false;
+		
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
@@ -142,6 +143,8 @@ public class PetInfo {
 				prop.setProperty("petinfo.petcurrentxp", String.valueOf(currentPet.getCurrentXp()));
 				prop.setProperty("petinfo.petlevel", String.valueOf(currentPet.getPetLevel()));
 				prop.setProperty("petinfo.xpNeededForNextLevel", String.valueOf(currentPet.getXpNeededForNextLevel()));
+				prop.setProperty("petinfo.displayIcon", displayIcon?"true":"false");
+
 				prop.store(output, null);
 
 			} catch (IOException io) {

@@ -31,6 +31,18 @@ public class PetInfoCommand extends CommandBase {
 			case "gui":
 				PetInfo.openGui=true;
 				break;
+			case "-display":
+					if(args[1]!=null) {
+						if(args[1].equals("icon")) {
+							PetInfo.displayIcon=true;
+						}else if(args[1].equals("text")) {
+							PetInfo.displayIcon=false;
+						}else {
+							PetInfo.displayIcon=false;
+						}
+					}
+				
+				break;
 			}
 		}
 

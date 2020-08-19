@@ -1,23 +1,17 @@
 package com.crosafan.petinfo.helpers;
 
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.crosafan.petinfo.PetInfo;
-import com.ibm.icu.text.NumberFormat;
+import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.StringUtils;
-import net.minecraftforge.common.util.Constants;
 
 public class Helper {
 
@@ -99,6 +93,8 @@ public class Helper {
 		} else if (rarity.equals("§6")) {
 			rarityIndex = 4;
 		}
+		if (level > 100)
+			level = 100;
 
 		return petLevelTable[level - 1][rarityIndex];
 
@@ -154,6 +150,22 @@ public class Helper {
 
 		}
 		return heldItemPetXpBoost;
+	}
+
+	public static int getRarityColorFromString(String input) {
+		int rarityColor = 0;
+		if (input.contains("§a")) {
+			rarityColor = 0x3cbd3c;
+		} else if (input.contains("§9")) {
+			rarityColor = 0x5555FF;
+		} else if (input.contains("§5")) {
+			rarityColor = 0xAA00AA;
+		} else if (input.contains("§6")) {
+			rarityColor = 0xFFAA00;
+		} else if (input.contains("§f")) {
+			rarityColor = 0xFFFFFF;
+		}
+		return rarityColor;
 	}
 
 }
