@@ -68,10 +68,27 @@ public class RenderListener {
 		petInfo.openGui = false;
 	}
 
+	int heightOld = 0;
+	int widthOld = 0;
+
 	public void renderPet() {
 		try {
 			int x = petInfo.guiLocation[0];
 			int y = petInfo.guiLocation[1];
+
+			ScaledResolution sr = new ScaledResolution(Minecraft.getMinecraft());
+
+			int scaledWidth = sr.getScaledWidth();
+			int scaledHeight = sr.getScaledHeight();
+			
+			int drawX=x;
+			int drawY=y;
+			
+			if(widthOld!=0) {
+				drawX = x * scaledWidth / widthOld;
+			}
+			if(heightOld!=0)
+			drawY = y * scaledHeight / heightOld;
 
 			if (petInfo.currentPet.getDisplayName().equals("No pet selected!")) {
 				renderer.drawString(PetInfo.currentPet.getDisplayName(), x, y, textColor, true);
@@ -84,11 +101,11 @@ public class RenderListener {
 			}
 			int rarityColor = Helper.getRarityColorFromString(onlyPetName);
 			float progress = Helper.roundToNDecimals(petInfo.currentPet.getCurrentProgress(), 1);
-			
+
 			if (petInfo.displayIcon) {
 				PetIcon petIcon = PetIcon.getByDisplayname(StringUtils.stripControlCodes(onlyPetName));
 
-				drawCircularProgressBar(x + 16, y + 16, 16, (petInfo.currentPet.getCurrentProgress() / 100), rarityColor);
+				drawCircularProgressBar(drawX + 16, drawY + 16, 16, (petInfo.currentPet.getCurrentProgress() / 100), rarityColor);
 
 				try {
 					Minecraft.getMinecraft().getTextureManager().bindTexture(petIcon.location);
@@ -97,18 +114,23 @@ public class RenderListener {
 					Minecraft.getMinecraft().getTextureManager().bindTexture(PetIcon.UKNOWN.location);
 
 				}
-				Gui.drawModalRectWithCustomSizedTexture(x, y, 0, 0, 32, 32, 32, 32);
-				renderer.drawString("Lvl [" + petInfo.currentPet.getPetLevel() + "]", x, y + 36, rarityColor, true);
+				Gui.drawModalRectWithCustomSizedTexture(drawX, drawY, 0, 0, 32, 32, 32, 32);
+				renderer.drawString("Lvl [" + petInfo.currentPet.getPetLevel() + "]", drawX, drawY + 36, rarityColor, true);
 
 			} else {
 				renderer.drawString(petInfo.currentPet.getDisplayName() + " §f" + String.valueOf(progress) + "%", petInfo.guiLocation[0], petInfo.guiLocation[1], textColor, true);
 
 			}
+			
+			 heightOld = scaledHeight;
+			 widthOld = scaledWidth;
 
 		} catch (NullPointerException npe) {
 			petInfo.logger.error(npe.getLocalizedMessage());
 
 		}
+		
+		
 
 	}
 

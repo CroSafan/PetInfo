@@ -79,11 +79,12 @@ public class PlayerListener {
 		}
 
 		else if (message.contains("SKILL LEVEL UP")) {
+			System.out.println("Skill detected");
 			Matcher matcher = TAMING_SKILL_LEVEL_UP_PATTERN.matcher(message);
 			if (!matcher.matches()) {
 				return;
 			}
-			petInfo.tamingLevel = Integer.parseInt(matcher.group(3));
+			petInfo.tamingLevel = Helper.getLevelFromRomanNumerals(matcher.group(3));
 			petInfo.saveConfig();
 		}
 		// 2 : 'Status' message, displayed above action bar, where song notifications are.
@@ -112,6 +113,7 @@ public class PlayerListener {
 				// for the first time, when we don't have the current xp loaded
 				petInfo.gainedXp = Float.parseFloat(matcher.group(1));
 				petInfo.currentXp = currentXp;
+				
 
 			} else {
 				// prevents adding the same xp gain multiple time
@@ -128,8 +130,13 @@ public class PlayerListener {
 				}
 
 			}
+			if(petInfo.gainedXp <0) {
+				petInfo.gainedXp=0;
+			}
 			float xpGain = calculateXpGain();
 			float newXp = petInfo.currentPet.getCurrentXp() + xpGain;
+		
+			
 			petInfo.currentPet.setCurrentXp(newXp);
 			float progress = (petInfo.currentPet.getCurrentXp() / petInfo.currentPet.getXpNeededForNextLevel()) * 100.0f;
 
@@ -184,18 +191,20 @@ public class PlayerListener {
 							// 32 index of taming skill slot
 							ItemStack tamingSkill = null;
 							for (int i = 0; i < inv.getSizeInventory(); i++) {
-								if (inv.getStackInSlot(i).getDisplayName().contains("Taming")) {
+								if (inv.getStackInSlot(i) != null && inv.getStackInSlot(i).getDisplayName().contains("Taming")) {
 									tamingSkill = inv.getStackInSlot(i);
 									break;
 								}
 							}
-
-							String[] tamingSplitted = tamingSkill.getDisplayName().trim().split(" ");
-							if (tamingSplitted.length <= 1) {
-								petInfo.tamingLevel = 1;
-							} else {
-								petInfo.tamingLevel = Helper.getLevelFromRomanNumerals(tamingSplitted[1]);
+							if (tamingSkill != null) {
+								String[] tamingSplitted = tamingSkill.getDisplayName().trim().split(" ");
+								if (tamingSplitted.length <= 1) {
+									petInfo.tamingLevel = 1;
+								} else {
+									petInfo.tamingLevel = Helper.getLevelFromRomanNumerals(tamingSplitted[1]);
+								}
 							}
+
 							petInfo.saveConfig();
 						}
 					}
