@@ -1,10 +1,13 @@
 package com.crosafan.petinfo.commands;
 
+import java.util.List;
+
 import com.crosafan.petinfo.PetInfo;
 
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.util.BlockPos;
 
 public class PetInfoCommand extends CommandBase {
 
@@ -51,5 +54,16 @@ public class PetInfoCommand extends CommandBase {
 	public boolean canCommandSenderUseCommand(final ICommandSender sender) {
 	    return true;
 	  }
+
+	@Override
+	public List<String> addTabCompletionOptions(ICommandSender sender, String[] args, BlockPos pos) {
+		if (args.length == 1) {
+			return getListOfStringsMatchingLastWord(args, "-gui", "-display");
+		} else if (args.length == 2 && args[0].equalsIgnoreCase("-display")) {
+			return getListOfStringsMatchingLastWord(args, "icon", "text");
+		}
+
+		return null;
+	}
 
 }
